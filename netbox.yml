@@ -1,15 +1,15 @@
 ---
 - hosts: netbox
-  gather_facts: False
-  vars:
-    ansible_python_interpreter: venv/bin/python3  
+  collections:
+    - netbox.netbox
   module_defaults:
     group/netbox.netbox.netbox:
       validate_certs: False
       netbox_url: "{{ netbox_url }}"
       netbox_token: "{{ netbox_api_token }}"
+  vars:
   tasks:
-    - name: Poke the api
+    - name: Poke the api as a sanity-check
       uri:
         url: "{{ netbox_url}}/api/"
         method: GET
@@ -17,12 +17,67 @@
           Accept: application/json
           Authorization: "Token {{ netbox_api_token }}"
 
-    - name: "Setup Sites"
+    - name: Install pip
+      apt:
+        name:
+          - python3-pip
+
+    - name: Install dependencies
+      pip:
+        name:
+          - pynetbox
+          - netaddr
+          - pytz
+
+    - name: Create a tenant
+      netbox.netbox.netbox_tenant:
+        data:
+          name: "{{ item.Tenant }}"
+        state: present
+      with_items: "{{ prefixes }}"
+
+    - name: "Create some sites for the gear"
       netbox.netbox.netbox_site:
-        validate_certs: False
-        netbox_url: "{{ netbox_url }}"
-        netbox_token: "{{ netbox_api_token }}"
         data: "{{ item }}"
       loop: "{{ site_list }}"
 
+    - name: "Create manufacturers"
+      netbox.netbox.netbox_manufacturer:
+        data:
+          name: "{{ manufacturer }}"
+      loop: "{{ manufacturers }}"
+      loop_control:
+        loop_var: manufacturer
 
+    - name: "Create a device type"
+      netbox.netbox.netbox_device_type:
+        data:
+          model: "{{ device_type.model }}"
+          manufacturer: "{{ device_type.manufacturer }}"
+          slug: "{{ device_type.slug }}"
+          part_number: "{{ device_type.part_number }}"
+          is_full_depth: "{{ device_type.full_depth }}"
+      loop: "{{ device_types }}"
+      loop_control:
+        loop_var: device_type
+        label: "{{ device_type['model'] }}"
+
+    - name: "Create device role"
+      netbox.netbox.netbox_device_role:
+        data:
+          name: "{{ device_role.name }}"
+          slug: "{{ device_role.slug }}"
+      loop: "{{ device_roles }}"
+      loop_control:
+        loop_var: device_role
+        label: "{{ device_role['slug'] }}"
+
+    - name: "Add the device"
+      netbox.netbox.netbox_device:
+        data:
+          name: "syseleven-testserver"
+          device_type: "dell-poweredge-r340"
+          serial: "1234"
+          status: Active
+          role: 1
+          site: “NYC"

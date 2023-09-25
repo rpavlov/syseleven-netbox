@@ -1,6 +1,10 @@
 ---
 netbox_api_token: "{{ vault_netbox_api_token }}" 
 netbox_url: http://localhost:443
+ansible_python_interpreter: /usr/bin/python3
+prefixes:
+  - Prefix: 10.102.10.0/24
+    Tenant: vnet-arc-fgt-dev-eu1
 site_list:
   - name: “NYC”
     time_zone: America/New_York
@@ -11,38 +15,15 @@ site_list:
   - name: “RTP”
     time_zone: America/New_York
     status: Active
-manufacturers:  # In alphabetical order
-  - Arista
-  - Cisco
-  - Juniper
+manufacturers:
+  - Dell
 device_types:
-  - model: “ASAv”
-    manufacturer: “Cisco”
-    slug: “asav”
-    part_number: “asav”
-    Full_depth: False
-  - model: “CSR1000v”
-    manufacturer: “Cisco”
-    slug: “csr1000v”
-    part_number: “csr1000v”
-    Full_depth: False
-  - model: “vEOS”
-    manufacturer: “Arista”
-    slug: “veos”
-    part_number: “veos”
-    Full_depth: False
-  - model: “vSRX”
-    manufacturer: “Juniper”
-    slug: “vsrx”
-    part_number: “vsrx”
-    Full_depth: False
-platforms:
-  - name: “ASA”
-    slug: “asa”
-  - name: “EOS”
-    slug: “eos”
-  - name: “IOS”
-    slug: “ios”
-  - name: “JUNOS”
-    slug: “junos”
-
+  - model: “PowerEdge R340”
+    manufacturer: “Dell”
+    slug: “dell-poweredge-r340"
+    part_number: 123
+    full_depth: True
+device_roles:
+  - name: "Application Server"
+    slug: "app-server"
+    color: "Grey"
