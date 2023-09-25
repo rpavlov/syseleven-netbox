@@ -20,4 +20,6 @@ The netbox api token variable will be automatically decrypted and used. You can 
 
 After running the playbook, you can then verify on the netbox UI that the asset was sucessfully added by forwarding a port from the docker container running netbox to your control machine `ssh syseleven@195.192.128.96 -L 2222:195.192.130.34:443` and then accessing localhost:2222 with credentials admin/admin
 
+## Notes
 
+The final play to actually add a device will not work, because of https://github.com/netbox-community/netbox/discussions/13861
